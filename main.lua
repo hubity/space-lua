@@ -4,6 +4,15 @@ enemies_controller = {}
 enemies_controller.enemies = {}
 enemies_controller.image = love.graphics.newImage("midia/enemy.png")
 
+function checkCollisions(enemies, bullets)
+    for i, e in ipairs(enemies) do
+      for _, b in pairs(bullets) do
+        if b.y <= e.y + e.height and b.x > e.x and b.x < e.x + e.width then
+          table.remove(enemies, i)
+        end
+      end
+    end
+  end
 function love.load()
     player = {}
     player.x = 0
@@ -12,8 +21,11 @@ function love.load()
     player.cooldown = 20
     player.speed = 2
     player.image = love.graphics.newImage("midia/player.png")
+    player.fire_sound = love.audio.newSource("music/Laser_Shoot2.wav", "static")
+    
     player.fire = function()
         if player.cooldown <= 0 then
+            love.audio.play(player.fire_sound)
             player.cooldown = 20
             bullet = {}
             bullet.x = player.x + 35
@@ -21,8 +33,8 @@ function love.load()
             table.insert(player.bullets, bullet)
         end
     end
-    enemies_controller:spawnEnemy(0, 0)
-    enemies_controller:spawnEnemy(100, 0)
+    enemies_controller:spawnEnemy(10, 0)
+    enemies_controller:spawnEnemy(110, 0)
 end
 
 function enemies_controller:spawnEnemy(x, y)
@@ -30,6 +42,8 @@ function enemies_controller:spawnEnemy(x, y)
     enemy = {}
     enemy.x = x
     enemy.y = y
+    enemy.width = 50
+    enemy.height = 50
     enemy.bullets = {}
     enemy.cooldown = 20
     enemy.speed = 2
@@ -69,6 +83,7 @@ function love.update(dt)
         end
         b.y = b.y - 10
     end
+    checkCollisions(enemies_controller.enemies, player.bullets)
 end
 
     function love.draw()
